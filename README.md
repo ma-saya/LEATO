@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LEATO (YouTube動画・学習サポートアプリ)
 
-## Getting Started
+LEATOは、YouTubeを使った学習の効率を向上させるための次世代Webアプリケーションです。動画の再生状況や視聴履歴を管理する機能だけでなく、AIによる解説要約やクイズ機能を搭載し、ただ「見る」だけではなく「理解して定着させる」学習体験を提供します。
 
-First, run the development server:
+## 主な機能
+
+1. **学習状況のカレンダー管理・可視化**
+   - 1日の学習目標時間（例：120分）に対する達成度をカレンダー上にプログレスリングで可視化します。
+   - 学習した動画のカテゴリー・記録時間・実績データが一目でわかります。
+
+2. **YouTube動画のシアター型学習環境**
+   - 本編動画に集中できるよう、関連動画や無駄な情報を非表示にするオリジナルUIの動画プレイヤーを実装しています。
+   - 「お気に入り」追加や、複数の動画を「フォルダ（カテゴリー）」で整理できます。
+3. **AIによる「Lightning/Deep 要約機能」**
+   - **Lightning モード**: 数秒で動画全体の概要とポイントをサクッと把握できます。
+   - **Deep モード**: 動画内容を徹底的に深堀りし、重要な理由や具体的な実践コードの例、詳しい解説を生成します。
+   - AIの回答や動画の重要な部分をワンクリックで自身の「学習ノート」へ保存可能です。
+
+4. **確認クイズとチャット**
+   - 学習内容の理解度を測るためのAI自動生成クイズが利用可能です。
+   - 動画に対する疑問があれば、動画内容をベースにした「質問チャット」からAIに質問できます。
+
+## 技術スタック
+
+- **Frontend**: Next.js 16 (React 18), Tailwind CSS, TypeScript, Lucide React, Shadcn UI
+- **Backend/Auth/DB**: Supabase (PostgreSQL, Supabase Auth), Prisma
+- **AI Integrations**: Gemini 2.0 Flash (予定/想定API)
+- **Deployment**: Vercel (予定)
+- **Version Control**: Git / GitHub
+
+## 環境構築・実行方法
+
+開発環境を立ち上げるには以下のコマンドを実行してください。
 
 ```bash
+npm install
 npm run dev
-# or
+# または
+yarn install
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ブラウザで `http://localhost:3000` にアクセスすると、アプリケーションを利用できます。

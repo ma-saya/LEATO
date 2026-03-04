@@ -1,0 +1,56 @@
+﻿
+> leato@0.1.0 build
+> next build
+
+笆ｲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+node.exe : 笞 The "middleware" file c
+onvention is deprecated. Please use "
+proxy" instead. Learn more: https://n
+extjs.org/docs/messages/middleware-to
+-proxy
+発生場所 C:\Program Files\nodejs\npm.ps1:
+29 文字:3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpec
+i    fied: (笞 The "middlew...leware-
+to    -proxy:String) [], RemoteExcept
+ion
+    + FullyQualifiedErrorId : NativeC
+o    mmandError
+ 
+  Creating an optimized production build ...
+笨・Compiled successfully in 11.4s
+  Running TypeScript ...
+Failed to compile.
+
+./src/app/log/new/page.tsx:21:59
+Type error: Property 'categories' doe
+s not exist on type 'Promise<Settings
+>'.
+
+[0m [90m 19 |[39m   [36mconst[39
+m [isLoading[33m,[39m setIsLoading]
+ [33m=[39m useState([36mfalse[39m
+)[33m;[39m
+ [90m 20 |[39m   [36mconst[39m in
+itialSettings [33m=[39m getSettings
+()[33m;[39m
+[31m[1m>[22m[39m[90m 21 |[39m  
+ [36mconst[39m [categories] [33m=
+[39m useState[33m<[39m[33mstring[
+39m[][33m>[39m(initialSettings[33m
+.[39mcategories)[33m;[39m
+ [90m    |[39m                     
+                                     
+ [31m[1m^[22m[39m
+ [90m 22 |[39m   
+ [90m 23 |[39m   [90m// Form State
+[39m
+ [90m 24 |[39m   [36mconst[39m [d
+ate] [33m=[39m useState(getLocalDat
+eString())[33m;[39m[0m
+Next.js build worker exited with code
+: 1 and signal: null

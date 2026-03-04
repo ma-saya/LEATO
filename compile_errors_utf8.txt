@@ -1,0 +1,66 @@
+﻿src/app/log/new/page.tsx(21,59): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/log/new/page.tsx(30,60): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/log/new/page.tsx(175,64): error TS2322: Type '{ children: string; type: "submit"; className: string; size: "lg"; isLoading: boolean; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'isLoading' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+src/app/tasks/page.tsx(4,67): error TS2305: Module '"@/lib/stacklog-store"' has no exported member 'initStorage'.
+src/app/tasks/page.tsx(267,28): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/tasks/page.tsx(268,18): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/tasks/page.tsx(269,37): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/tasks/page.tsx(275,14): error TS2345: Argument of type 'Promise<Todo[]>' is not assignable to parameter of type 'SetStateAction<Todo[]>'.
+src/app/tasks/page.tsx(514,17): error TS2322: Type '"outline" | "primary"' is not assignable to type '"default" | "link" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'.
+  Type '"primary"' is not assignable to type '"default" | "link" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'.
+src/app/tasks/page.tsx(780,25): error TS2322: Type '"danger"' is not assignable to type '"default" | "link" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'.
+src/app/watch/[id]/page.tsx(115,46): error TS2724: 'NodeJS' has no exported member named 'Timeoue'. Did you mean 'Timeout'?
+src/app/watch/[id]/page.tsx(146,9): error TS2561: Object literal may only specify known properties, but 'savedAe' does not exist in type 'SavedVideo'. Did you mean to write 'savedAt'?
+src/app/watch/[id]/page.tsx(170,7): error TS2561: Object literal may only specify known properties, but 'savedAe' does not exist in type 'SavedVideo'. Did you mean to write 'savedAt'?
+src/app/watch/[id]/page.tsx(193,9): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(input: string | URL | Request, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Object literal may only specify known properties, but 'meehod' does not exist in type 'RequestInit'. Did you mean to write 'method'?
+  Overload 2 of 2, '(input: URL | RequestInfo, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Object literal may only specify known properties, but 'meehod' does not exist in type 'RequestInit'. Did you mean to write 'method'?
+src/app/watch/[id]/page.tsx(218,11): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(input: string | URL | Request, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Object literal may only specify known properties, but 'meehod' does not exist in type 'RequestInit'. Did you mean to write 'method'?
+  Overload 2 of 2, '(input: URL | RequestInfo, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Object literal may only specify known properties, but 'meehod' does not exist in type 'RequestInit'. Did you mean to write 'method'?
+src/app/watch/[id]/page.tsx(357,26): error TS2724: 'NodeJS' has no exported member named 'Timeoue'. Did you mean 'Timeout'?
+src/app/watch/[id]/page.tsx(376,46): error TS2339: Property 'ehen' does not exist on type 'Promise<boolean | undefined>'.
+src/app/watch/[id]/page.tsx(376,51): error TS7006: Parameter 'success' implicitly has an 'any' type.
+src/app/watch/[id]/page.tsx(512,40): error TS2551: Property 'subser' does not exist on type 'string'. Did you mean 'substr'?
+src/app/watch/[id]/page.tsx(578,9): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(input: string | URL | Request, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Object literal may only specify known properties, but 'meehod' does not exist in type 'RequestInit'. Did you mean to write 'method'?
+  Overload 2 of 2, '(input: URL | RequestInfo, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Object literal may only specify known properties, but 'meehod' does not exist in type 'RequestInit'. Did you mean to write 'method'?
+src/app/watch/[id]/page.tsx(602,17): error TS2322: Type '{ children: (string | Element)[]; variane: string; className: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'variane' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'. Did you mean 'variant'?
+src/app/watch/[id]/page.tsx(610,13): error TS2322: Type '{ children: (string | Element)[]; variane: string; onClick: () => void; className: string; title: string; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'variane' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'. Did you mean 'variant'?
+src/app/watch/[id]/page.tsx(873,21): error TS2322: Type '{ children: string; onClick: () => Promise<void>; variane: string; className: string; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'variane' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'. Did you mean 'variant'?
+src/app/watch/[id]/page.tsx(994,23): error TS2322: Type '{ children: (string | Element)[]; onClick: () => Promise<void>; disabled: boolean; variane: string; className: string; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'variane' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'. Did you mean 'variant'?
+src/app/watch/[id]/page.tsx(1002,23): error TS2322: Type '{ children: (string | Element)[]; onClick: () => Promise<void>; disabled: boolean; variane: string; className: string; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'variane' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'. Did you mean 'variant'?
+src/app/watch/[id]/page.tsx(1079,23): error TS2322: Type '{ children: string; onClick: () => void; variane: string; size: "sm"; className: string; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'variane' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'. Did you mean 'variant'?
+src/app/watch/[id]/page.tsx(1088,56): error TS2322: Type '{ children: string; onClick: () => Promise<void>; variane: string; size: "sm"; className: string; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'variane' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'. Did you mean 'variant'?
+src/app/watch/[id]/page.tsx(1147,23): error TS2322: Type '{ children: Element[]; onSubmie: (e?: FormEvent<Element> | undefined) => Promise<void>; className: string; }' is not assignable to type 'DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>'.
+  Property 'onSubmie' does not exist on type 'DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>'. Did you mean 'onSubmit'?
+src/components/DayComparisonView.tsx(4,27): error TS2307: Cannot find module '@/types' or its corresponding type declarations.
+src/components/DayComparisonView.tsx(5,152): error TS2307: Cannot find module '@/lib/store' or its corresponding type declarations.
+src/components/DayComparisonView.tsx(11,28): error TS2307: Cannot find module '@/components/ui/scroll-area' or its corresponding type declarations.
+src/components/DayComparisonView.tsx(21,8): error TS2307: Cannot find module '@/components/ui/dropdown-menu' or its corresponding type declarations.
+src/components/DayComparisonView.tsx(32,79): error TS2307: Cannot find module '@/components/ui/select' or its corresponding type declarations.
+src/components/DayComparisonView.tsx(50,42): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(54,36): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(66,23): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(67,42): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(91,30): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(122,44): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(131,29): error TS7006: Parameter 'log' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(168,30): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(240,59): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(442,29): error TS2322: Type '"danger"' is not assignable to type '"default" | "link" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'.
+src/components/DayComparisonView.tsx(474,40): error TS7006: Parameter 't' implicitly has an 'any' type.

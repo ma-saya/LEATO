@@ -1,0 +1,8 @@
+﻿src/app/log/new/page.tsx(21,59): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/log/new/page.tsx(30,60): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/tasks/page.tsx(265,28): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/tasks/page.tsx(266,18): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/tasks/page.tsx(267,37): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/tasks/page.tsx(273,14): error TS2345: Argument of type 'Promise<Todo[]>' is not assignable to parameter of type 'SetStateAction<Todo[]>'.
+src/app/tasks/page.tsx(512,17): error TS2322: Type '"outline" | "primary"' is not assignable to type '"link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'.
+  Type '"primary"' is not assignable to type '"link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'.

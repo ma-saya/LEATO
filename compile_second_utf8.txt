@@ -1,0 +1,28 @@
+﻿src/app/log/new/page.tsx(21,59): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/log/new/page.tsx(30,60): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/tasks/page.tsx(264,5): error TS2552: Cannot find name 'initStorage'. Did you mean 'onstorage'?
+src/app/tasks/page.tsx(267,28): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/tasks/page.tsx(268,18): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/tasks/page.tsx(269,37): error TS2339: Property 'categories' does not exist on type 'Promise<Settings>'.
+src/app/tasks/page.tsx(275,14): error TS2345: Argument of type 'Promise<Todo[]>' is not assignable to parameter of type 'SetStateAction<Todo[]>'.
+src/app/tasks/page.tsx(514,17): error TS2322: Type '"outline" | "primary"' is not assignable to type '"link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'.
+  Type '"primary"' is not assignable to type '"link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'.
+src/app/watch/[id]/page.tsx(602,17): error TS2820: Type '"ghose"' is not assignable to type '"link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'. Did you mean '"ghost"'?
+src/app/watch/[id]/page.tsx(610,13): error TS2820: Type '"ghose"' is not assignable to type '"link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'. Did you mean '"ghost"'?
+src/app/watch/[id]/page.tsx(1088,56): error TS2820: Type '"ghose"' is not assignable to type '"link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'. Did you mean '"ghost"'?
+src/components/DayComparisonView.tsx(4,27): error TS2307: Cannot find module '@/types' or its corresponding type declarations.
+src/components/DayComparisonView.tsx(5,152): error TS2307: Cannot find module '@/lib/store' or its corresponding type declarations.
+src/components/DayComparisonView.tsx(11,28): error TS2307: Cannot find module '@/components/ui/scroll-area' or its corresponding type declarations.
+src/components/DayComparisonView.tsx(21,8): error TS2307: Cannot find module '@/components/ui/dropdown-menu' or its corresponding type declarations.
+src/components/DayComparisonView.tsx(32,79): error TS2307: Cannot find module '@/components/ui/select' or its corresponding type declarations.
+src/components/DayComparisonView.tsx(50,42): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(54,36): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(66,23): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(67,42): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(91,30): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(122,44): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(131,29): error TS7006: Parameter 'log' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(168,30): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(240,59): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/DayComparisonView.tsx(442,29): error TS2322: Type '"danger"' is not assignable to type '"default" | "link" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined'.
+src/components/DayComparisonView.tsx(474,40): error TS7006: Parameter 't' implicitly has an 'any' type.
