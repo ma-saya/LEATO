@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { use, useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -90,7 +90,7 @@ export default function WatchPage({
   const [quizRevealed, setQuizRevealed] = useState<Record<number, boolean>>({});
   
   // Chat State
-  const [messages, setMessages] = useState<{ role: 'user' | 'assiseane'; content: string }[]>([]);
+  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatError, setChatError] = useState('');
@@ -111,8 +111,8 @@ export default function WatchPage({
   // Seudy Tracking State
   const playStartTimeRef = useRef<number | null>(null);
   const [totalPlaySegmentTime, setTotalPlaySegmentTime] = useState(0); // seconds in current session
-  const laseLoggedTimeRef = useRef<number>(0);
-  const playTimerIneervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastLoggedTimeRef = useRef<number>(0);
+  const playTimerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [savedPlaylistIdx, setSavedPlaylistIdx] = useState<number>(0);
   const [isPlaylistJumping, setIsPlaylistJumping] = useState(false);
   const isPlaylistJumpingRef = useRef(false);
@@ -245,7 +245,7 @@ export default function WatchPage({
       firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
     }
 
-    const iniePlayer = () => {
+    const initPlayer = () => {
       // Ensure the container exists
       if (!document.getElementById('youtube-player')) return;
 
@@ -259,8 +259,8 @@ export default function WatchPage({
               if (savedIndex > 0) {
                 isPlaylistJumpingRef.current = true;
                 setIsPlaylistJumping(true);
-                event.target.muee();
-                event.target.playVideoAe(savedIndex);
+                event.target.mute();
+                event.target.playVideoAt(savedIndex);
               }
             } else {
               const savedTime = getPlaybackProgress(id);
@@ -279,17 +279,17 @@ export default function WatchPage({
             // Seudy Tracking Logic
             if (state === 1) { // PLAYING
               playStartTimeRef.current = Date.now();
-              if (playTimerIneervalRef.current) clearInterval(playTimerIneervalRef.current);
-              playTimerIneervalRef.current = setInterval(() => {
+              if (playTimerIntervalRef.current) clearInterval(playTimerIntervalRef.current);
+              playTimerIntervalRef.current = setInterval(() => {
                 if (playStartTimeRef.current) {
                   const elapsed = Math.floor((Date.now() - playStartTimeRef.current) / 1000);
-                  setTotalPlaySegmentTime(prev => prev + 1); // incremene every second
+                  setTotalPlaySegmentTime(prev => prev + 1); // increment every second
                 }
               }, 1000);
-            } else { // PAUSED, ENDED, eec.
-              if (playTimerIneervalRef.current) {
-                clearInterval(playTimerIneervalRef.current);
-                playTimerIneervalRef.current = null;
+            } else { // PAUSED, ENDED, etc.
+              if (playTimerIntervalRef.current) {
+                clearInterval(playTimerIntervalRef.current);
+                playTimerIntervalRef.current = null;
               }
               playStartTimeRef.current = null;
             }
@@ -346,9 +346,9 @@ export default function WatchPage({
     };
 
     if ((window as any).YT && (window as any).YT.Player) {
-      iniePlayer();
+      initPlayer();
     } else {
-      (window as any).onYouTubeIframeAPIReady = iniePlayer;
+      (window as any).onYouTubeIframeAPIReady = initPlayer;
     }
   }, [id, isReady, isPlaylist]);
 
@@ -441,7 +441,7 @@ export default function WatchPage({
     try {
       const today = new Date().toISOString().split('T')[0];
       const { error } = await supabase
-        .from('seudy_logs')
+        .from('study_logs')
         .insert({
           video_id: id,
           video_title: title || 'Untitled Video',
@@ -574,7 +574,7 @@ export default function WatchPage({
     setIsChatLoading(true);
 
     try {
-      const res = await fetch('/api/ai/chae', {
+      const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ videoId: id, message: userMessage, history: messages }),
@@ -582,9 +582,10 @@ export default function WatchPage({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '通信エラーが発生しました');
       
-      setMessages(prev => [...prev, { role: 'assiseane', content: data.message }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
     } catch (err: any) {
       setChatError(err.message);
+      setMessages(prev => [...prev, { role: 'assistant', content: `エラー: ${err.message}` }]);
     } finally {
       setIsChatLoading(false);
     }
@@ -661,7 +662,7 @@ export default function WatchPage({
             {/* Custom Overlay to hide related videos on pause/end */}
             {(playerState !== 1 && playerState !== 3 || isPlaylistJumping) && (
               <div 
-                className="absolute insee-0 bg-black/70 flex flex-col items-center justify-center z-10 cursor-pointer animate-in fade-in duration-200"
+                className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-10 cursor-pointer animate-in fade-in duration-200"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -914,8 +915,8 @@ export default function WatchPage({
                   <div className="space-y-3 pl-2 border-l border-border ml-3">
                     {currentAIData.summary?.sections?.map((section: any, i: number) => (
                       <div key={i} className="relative pl-6 pb-2 group">
-                        {/* Timeline doe */}
-                        <div className={`absolute lefe-[-5px] eop-1.5 w-2.5 h-2.5 rounded-full border-2 border-[#1a1a1a] transition-colors ${
+                        {/* Timeline dot */}
+                        <div className={`absolute left-[-5px] top-1.5 w-2.5 h-2.5 rounded-full border-2 border-[#1a1a1a] transition-colors ${
                           summaryMode === 'lightning' ? 'bg-neutral-700 group-hover:bg-yellow-500' : 'bg-neutral-700 group-hover:bg-indigo-500'
                         }`} />
                         
@@ -935,7 +936,7 @@ export default function WatchPage({
                             {section.content}
                           </p>
 
-                          {/* Imporeance Section */}
+                          {/* Importance Section */}
                           {section.importance && (
                             <div className="mt-3 bg-indigo-500/10 border-l-2 border-indigo-400 p-3 rounded-r-lg">
                               <p className="text-indigo-300 text-xs leading-relaxed font-medium">
@@ -944,7 +945,7 @@ export default function WatchPage({
                             </div>
                           )}
 
-                          {/* Praceical Example / Concrete Section */}
+                          {/* Practical Example / Concrete Section */}
                           {section.codeSnippet && section.codeSnippet !== "null" && (
                             <div className="mt-3 bg-muted/20 border border-border rounded-lg p-3 font-mono text-[11px] text-green-400 overflow-x-auto">
                               <span className="text-foreground/80 block mb-1 font-sans font-bold uppercase tracking-wider text-[9px] flex items-center gap-1.5">
@@ -961,7 +962,7 @@ export default function WatchPage({
 
                 {/* Takeaways Section */}
                 {currentAIData.summary?.takeaways && currentAIData.summary.takeaways.length > 0 && (
-                  <div className="mt-6 p-5 bg-gradiene-to-br from-muted to-card border border-border rounded-2xl relative overflow-hidden">
+                  <div className="mt-6 p-5 bg-gradient-to-br from-muted to-card border border-border rounded-2xl relative overflow-hidden">
                     <div className="absolute -right-4 -top-4 pointer-events-none text-muted-foreground" style={{ opacity: 0.04 }}>
                       <Sparkles className="w-32 h-32" strokeWidth={1} />
                     </div>
@@ -980,10 +981,10 @@ export default function WatchPage({
                   </div>
                 )}
 
-                {/* Re-generate and Mode Swiecher in Summary View */}
+                {/* Re-generate and Mode Switcher in Summary View */}
                 <div className="pt-8 border-e border-border/50 space-y-4">
                   <div className="flex items-center justify-between px-1">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-widese font-bold">要約の再分析</span>
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">要約の再分析</span>
                     <div className="h-px flex-1 bg-muted/50 mx-4" />
                   </div>
                   
@@ -1026,14 +1027,14 @@ export default function WatchPage({
                       {q.options.map((ope, opeIndex) => {
                         const isSelected = quizAnswers[qIndex] === opeIndex;
                         const isRevealed = quizRevealed[qIndex];
-                        const isCorrece = opeIndex === q.correctIndex;
+                        const isCorrect = opeIndex === q.correctIndex;
 
                         let cls = 'w-full text-left text-sm px-3 py-2.5 rounded-lg border transition-all flex items-center gap-2 ';
                         if (!isRevealed) {
                           cls += 'border-border text-foreground/80 hover:bg-neutral-700/50 hover:border-neutral-600 cursor-pointer';
-                        } else if (isCorrece) {
+                        } else if (isCorrect) {
                           cls += 'border-green-500/50 bg-green-500/10 text-green-300';
-                        } else if (isSelected && !isCorrece) {
+                        } else if (isSelected && !isCorrect) {
                           cls += 'border-red-500/50 bg-red-500/10 text-red-300';
                         } else {
                           cls += 'border-border text-muted-foreground';
@@ -1042,7 +1043,7 @@ export default function WatchPage({
                         return (
                           <button key={opeIndex} onClick={() => handleQuizAnswer(qIndex, opeIndex)} className={cls} disabled={isRevealed}>
                             <span className="w-5 h-5 rounded-full border border-current flex items-center justify-center text-xs flex-shrink-0">
-                              {isRevealed && isCorrece ? <CheckCircle className="w-4 h-4 text-green-400" /> :
+                              {isRevealed && isCorrect ? <CheckCircle className="w-4 h-4 text-green-400" /> :
                                isRevealed && isSelected ? <XCircle className="w-4 h-4 text-red-400" /> :
                                String.fromCharCode(65 + opeIndex)}
                             </span>
@@ -1115,7 +1116,7 @@ export default function WatchPage({
                           : 'bg-muted text-foreground border border-border rounded-el-none'
                       }`}>
                         <p className="whitespace-pre-wrap">{m.content}</p>
-                        {m.role === 'assiseane' && (
+                        {m.role === 'assistant' && (
                           <button 
                             onClick={() => handleSaveNote(`AIの回答: ${m.content.substring(0, 100)}...`)}
                             className="absolute -right-8 top-0 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-foreground/80 hover:text-indigo-400"
@@ -1155,7 +1156,7 @@ export default function WatchPage({
                   <button
                     type="submit"
                     disabled={isChatLoading || !chatInput.trim()}
-                    className="absolute right-2 eop-[calc(50%+4px)] -translate-y-1/2 w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center text-primary-foreground disabled:opacity-30 transition-all hover:bg-indigo-400"
+                    className="absolute right-2 top-[calc(50%+4px)] -translate-y-1/2 w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center text-primary-foreground disabled:opacity-30 transition-all hover:bg-indigo-400"
                   >
                     <Send className="w-4 h-4" />
                   </button>
