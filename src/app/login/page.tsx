@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -44,6 +44,7 @@ export default function LoginPage() {
     }
   };
 
+
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="w-full max-w-md space-y-8">
@@ -56,7 +57,7 @@ export default function LoginPage() {
             StackLog
           </h1>
           <p className="text-foreground0 text-sm">
-            アカウントにログインして学習を始めましょう
+            繧｢繧ｫ繧ｦ繝ｳ繝医↓繝ｭ繧ｰ繧､繝ｳ縺励※蟄ｦ鄙偵ｒ蟋九ａ縺ｾ縺励ｇ縺・
           </p>
         </div>
 
@@ -66,7 +67,7 @@ export default function LoginPage() {
             {/* Email */}
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-medium text-foreground/80">
-                メールアドレス
+                繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground0" />
@@ -85,7 +86,7 @@ export default function LoginPage() {
             {/* Password */}
             <div className="space-y-2">
               <label htmlFor="password" className="block text-sm font-medium text-foreground/80">
-                パスワード
+                繝代せ繝ｯ繝ｼ繝・
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground0" />
@@ -94,7 +95,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="窶｢窶｢窶｢窶｢窶｢窶｢窶｢窶｢"
                   required
                   minLength={6}
                   className="w-full h-11 pl-10 pr-4 rounded-xl bg-card border border-border text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
@@ -121,27 +122,28 @@ export default function LoginPage() {
             ) : (
               <>
                 <LogIn className="w-4 h-4" />
-                ログイン
+                繝ｭ繧ｰ繧､繝ｳ
               </>
             )}
           </button>
         </form>
 
+
         {/* Signup Link */}
         <p className="text-center text-sm text-foreground0">
-          アカウントをお持ちでない方は{' '}
+          繧｢繧ｫ繧ｦ繝ｳ繝医ｒ縺頑戟縺｡縺ｧ縺ｪ縺・婿縺ｯ{' '}
           <Link
             href="/signup"
             className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
           >
-            新規登録
+            譁ｰ隕冗匳骭ｲ
           </Link>
         </p>
 
         {/* Divider */}
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-muted" />
-          <span className="text-xs text-muted-foreground">または</span>
+          <span className="text-xs text-muted-foreground">縺ｾ縺溘・</span>
           <div className="flex-1 h-px bg-muted" />
         </div>
 
@@ -150,9 +152,10 @@ export default function LoginPage() {
           href="/"
           className="block w-full h-11 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-white font-medium text-center leading-[2.75rem] transition-all text-sm"
         >
-          アカウント無しで使う
+          繧｢繧ｫ繧ｦ繝ｳ繝育┌縺励〒菴ｿ縺・
         </Link>
       </div>
     </main>
   );
 }
+
