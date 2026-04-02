@@ -1,42 +1,56 @@
-﻿'use client';
+﻿"use client";
 
-import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import Link from 'next/link';
-import { Loader2, Mail, Lock, UserPlus, BookOpen, Check, X } from 'lucide-react';
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+import {
+  Loader2,
+  Mail,
+  Lock,
+  UserPlus,
+  BookOpen,
+  Check,
+  X,
+} from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 繝代せ繝ｯ繝ｼ繝牙ｼｷ蠎ｦ繝√ぉ繝・け
-  const passwordChecks = useMemo(() => ({
-    length: password.length >= 8,
-    hasLetter: /[a-zA-Z]/.test(password),
-    hasNumber: /[0-9]/.test(password),
-  }), [password]);
+  // パスワード強度チェック
+  const passwordChecks = useMemo(
+    () => ({
+      length: password.length >= 8,
+      hasLetter: /[a-zA-Z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+    }),
+    [password],
+  );
 
-  const isPasswordStrong = passwordChecks.length && passwordChecks.hasLetter && passwordChecks.hasNumber;
+  const isPasswordStrong =
+    passwordChecks.length &&
+    passwordChecks.hasLetter &&
+    passwordChecks.hasNumber;
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
-    // 繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+    // バリデーション
     if (!isPasswordStrong) {
-      setError('パスワードの条件を満たしてください。');
+      setError("パスワードの条件を満たしてください。");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('パスワードが一致しません。');
+      setError("パスワードが一致しません。");
       return;
     }
 
@@ -49,26 +63,27 @@ export default function SignupPage() {
       });
 
       if (authError) {
-        if (authError.message.includes('already registered')) {
-          setError('このメールアドレスは既に登録されています。');
+        if (authError.message.includes("already registered")) {
+          setError("このメールアドレスは既に登録されています。");
         } else {
           setError(authError.message);
         }
         return;
       }
 
-      router.push('/');
+      router.push("/");
       router.refresh();
     } catch {
-      setError('アカウント作成中にエラーが発生しました。');
+      setError("アカウント作成中にエラーが発生しました。");
     } finally {
       setLoading(false);
     }
   };
 
-
   const CheckItem = ({ ok, label }: { ok: boolean; label: string }) => (
-    <div className={`flex items-center gap-1.5 text-xs transition-colors ${ok ? 'text-emerald-400' : 'text-muted-foreground'}`}>
+    <div
+      className={`flex items-center gap-1.5 text-xs transition-colors ${ok ? "text-emerald-400" : "text-muted-foreground"}`}
+    >
       {ok ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
       {label}
     </div>
@@ -83,10 +98,10 @@ export default function SignupPage() {
             <BookOpen className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight">
-            繧｢繧ｫ繧ｦ繝ｳ繝井ｽ懈・
+            アカウント作成
           </h1>
           <p className="text-foreground0 text-sm">
-            StackLog縺ｧ蟄ｦ鄙偵ｒ邂｡逅・＠縺ｾ縺励ｇ縺・
+            StackLogで学習を効率化しましょう。
           </p>
         </div>
 
@@ -95,8 +110,11 @@ export default function SignupPage() {
           <div className="space-y-4">
             {/* Email */}
             <div className="space-y-2">
-              <label htmlFor="signup-email" className="block text-sm font-medium text-foreground/80">
-                繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ
+              <label
+                htmlFor="signup-email"
+                className="block text-sm font-medium text-foreground/80"
+              >
+                メールアドレス
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground0" />
@@ -114,8 +132,11 @@ export default function SignupPage() {
 
             {/* Password */}
             <div className="space-y-2">
-              <label htmlFor="signup-password" className="block text-sm font-medium text-foreground/80">
-                繝代せ繝ｯ繝ｼ繝・
+              <label
+                htmlFor="signup-password"
+                className="block text-sm font-medium text-foreground/80"
+              >
+                パスワード
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground0" />
@@ -124,7 +145,7 @@ export default function SignupPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="窶｢窶｢窶｢窶｢窶｢窶｢窶｢窶｢"
+                  placeholder="••••••••"
                   required
                   className="w-full h-11 pl-10 pr-4 rounded-xl bg-card border border-border text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                 />
@@ -141,8 +162,11 @@ export default function SignupPage() {
 
             {/* Confirm Password */}
             <div className="space-y-2">
-              <label htmlFor="signup-confirm" className="block text-sm font-medium text-foreground/80">
-                繝代せ繝ｯ繝ｼ繝会ｼ育｢ｺ隱搾ｼ・
+              <label
+                htmlFor="signup-confirm"
+                className="block text-sm font-medium text-foreground/80"
+              >
+                パスワード（確認）
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground0" />
@@ -151,13 +175,15 @@ export default function SignupPage() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="窶｢窶｢窶｢窶｢窶｢窶｢窶｢窶｢"
+                  placeholder="••••••••"
                   required
                   className="w-full h-11 pl-10 pr-4 rounded-xl bg-card border border-border text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                 />
               </div>
               {confirmPassword.length > 0 && password !== confirmPassword && (
-                <p className="text-xs text-red-400 pl-1">繝代せ繝ｯ繝ｼ繝峨′荳閾ｴ縺励∪縺帙ｓ</p>
+                <p className="text-xs text-red-400 pl-1">
+                  パスワードが一致しません
+                </p>
               )}
             </div>
           </div>
@@ -180,21 +206,20 @@ export default function SignupPage() {
             ) : (
               <>
                 <UserPlus className="w-4 h-4" />
-                繧｢繧ｫ繧ｦ繝ｳ繝井ｽ懈・
+                アカウント作成
               </>
             )}
           </button>
         </form>
 
-
         {/* Login Link */}
         <p className="text-center text-sm text-foreground0">
-          譌｢縺ｫ繧｢繧ｫ繧ｦ繝ｳ繝医ｒ縺頑戟縺｡縺ｮ譁ｹ縺ｯ{' '}
+          既にアカウントをお持ちの方は{" "}
           <Link
             href="/login"
             className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
           >
-            繝ｭ繧ｰ繧､繝ｳ
+            ログイン
           </Link>
         </p>
       </div>
