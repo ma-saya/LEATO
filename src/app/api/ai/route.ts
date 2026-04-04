@@ -1,100 +1,191 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import {
+  consumeDailyQuota,
+  getDailyQuotaSnapshot,
+  type AIQuota,
+} from "@/lib/ai-quota";
+import {
+  createClient as createServerClient,
+  getServerSupabaseConfigError,
+} from "@/lib/supabase/server";
+import {
+  createAdminClient,
+  getAdminSupabaseConfigError,
+} from "@/lib/supabase/admin";
 
 export const maxDuration = 60;
-
-const GEMINI_MODELS = [
-  "gemini-2.0-flash", 
-  "gemini-1.5-flash", 
-  "gemini-1.5-flash-latest",
-  "gemini-1.5-flash-8b"
-];
+export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const { videoId, title, mode = 'deep', checkOnly = false } = await request.json();
+  const startedAt = Date.now();
+  const { videoId, title, mode = "deep", checkOnly = false } =
+    await request.json();
+  const summaryMode = mode === "lightning" ? "lightning" : "deep";
 
   if (!videoId) {
     return NextResponse.json({ error: "videoId is required" }, { status: 400 });
   }
 
+  const configError = getAISupabaseConfigError();
+  if (configError) {
+    logAiRequest({
+      endpoint: "/api/ai",
+      userId: null,
+      status: 500,
+      startedAt,
+    });
+    return NextResponse.json({ error: configError }, { status: 500 });
+  }
+
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    logAiRequest({
+      endpoint: "/api/ai",
+      userId: null,
+      status: 401,
+      startedAt,
+    });
+    return NextResponse.json(
+      { error: "AI機能はログイン後に利用できます。" },
+      { status: 401 },
+    );
+  }
+
+  const dataClient = getDataClient(supabase);
   const youtubeKey = process.env.YOUTUBE_API_KEY;
   if (!youtubeKey) {
     return NextResponse.json({ error: "YouTube API Key is not configured (ENV)" }, { status: 500 });
   }
 
   try {
-    // モードごとのキャッシュID（例: 'video123_deep'）
-    const cacheId = `${videoId}_${mode}`;
+    const cacheId = `${videoId}_${summaryMode}`;
+    const quotaSnapshot = await getDailyQuotaSnapshot(user.id);
 
-    // --- Step 0: Check Cache in Supabase ---
     console.log(`Checking cache for: ${cacheId}`);
-    const { data: cachedData, error: cacheError } = await supabase
-      .from('videos')
-      .select('summary, quiz')
-      .eq('id', cacheId)
+    const { data: cachedData, error: cacheError } = await dataClient
+      .from("videos")
+      .select("summary, quiz")
+      .eq("id", cacheId)
       .single();
 
     if (cachedData && !cacheError) {
-      // 古いキャッシュフォーマットの判定（deepモードの場合のみ厳しく判定）
-      const isOldFormat = mode === 'deep' && (Array.isArray(cachedData.summary) || !cachedData.summary?.takeaways);
-      
+      const isOldFormat =
+        summaryMode === "deep" &&
+        (Array.isArray(cachedData.summary) || !cachedData.summary?.takeaways);
+
       if (isOldFormat) {
-        if (checkOnly) return NextResponse.json({ summary: null, quiz: null });
-        console.log('Old cache format detected. Bypassing cache to generate a new detailed summary with learning focus.');
+        if (checkOnly) {
+          logAiRequest({
+            endpoint: "/api/ai",
+            userId: user.id,
+            status: 200,
+            startedAt,
+            quotaRemaining: quotaSnapshot.remaining,
+          });
+          return NextResponse.json({
+            data: null,
+            summary: null,
+            quiz: null,
+            quota: quotaSnapshot,
+          });
+        }
+        console.log(
+          "Old cache format detected. Bypassing cache to generate a new detailed summary with learning focus.",
+        );
       } else {
-        console.log('Cache hit! Returning DB results.');
-        return NextResponse.json({
+        const payload = {
           summary: cachedData.summary,
           quiz: cachedData.quiz,
-          model: 'Cache (Supabase DB)'
+          model: "Cache (Supabase DB)",
+        };
+        console.log("Cache hit! Returning DB results.");
+        logAiRequest({
+          endpoint: "/api/ai",
+          userId: user.id,
+          status: 200,
+          startedAt,
+          quotaRemaining: quotaSnapshot.remaining,
         });
+        return jsonWithQuota(payload, quotaSnapshot);
       }
     }
 
-    if (cacheError && cacheError.code !== 'PGRST116') { // PGRST116 is "No rows found"
-      console.error('Supabase Cache Error:', cacheError);
+    if (cacheError && cacheError.code !== "PGRST116") {
+      console.error("Supabase Cache Error:", cacheError);
     }
 
     if (checkOnly) {
-      return NextResponse.json({ summary: null, quiz: null });
+      logAiRequest({
+        endpoint: "/api/ai",
+        userId: user.id,
+        status: 200,
+        startedAt,
+        quotaRemaining: quotaSnapshot.remaining,
+      });
+      return NextResponse.json({
+        data: null,
+        summary: null,
+        quiz: null,
+        quota: quotaSnapshot,
+      });
     }
 
-  let videoTitle = title || "不明";
-  let description = "";
-  let tags = "";
-  let channelTitle = "";
-  let duration = "";
-
-  try {
-    // Step 1: Get video details via YouTube Data API
-    const youtube = google.youtube({ version: "v3", auth: youtubeKey });
-    const videoRes = await youtube.videos.list({
-      part: ["snippet", "contentDetails"],
-      id: [videoId],
-    });
-
-    const videoInfo = videoRes.data.items?.[0];
-    if (videoInfo) {
-      const snippet = videoInfo.snippet;
-      videoTitle = title || snippet?.title || "不明";
-      description = snippet?.description || "";
-      tags = snippet?.tags?.join(", ") || "";
-      channelTitle = snippet?.channelTitle || "";
-      duration = formatDuration(videoInfo.contentDetails?.duration || "");
+    const quota = await consumeDailyQuota(user.id);
+    if (!quota.allowed) {
+      logAiRequest({
+        endpoint: "/api/ai",
+        userId: user.id,
+        status: 429,
+        startedAt,
+        quotaRemaining: quota.remaining,
+      });
+      return quotaExceededResponse(quota);
     }
-  } catch (ytError) {
-    console.warn("YouTube Data API skipped or failed (likely quota):", ytError);
-    // Proceed with minimum info (title from frontend)
-  }
 
-  const prompt = buildPrompt(videoTitle, channelTitle, duration, tags, description, mode as 'lightning' | 'deep');
+    let videoTitle = title || "不明";
+    let description = "";
+    let tags = "";
+    let channelTitle = "";
+    let duration = "";
 
-    // Step 2: Try Gemini
+    try {
+      const youtube = google.youtube({ version: "v3", auth: youtubeKey });
+      const videoRes = await youtube.videos.list({
+        part: ["snippet", "contentDetails"],
+        id: [videoId],
+      });
+
+      const videoInfo = videoRes.data.items?.[0];
+      if (videoInfo) {
+        const snippet = videoInfo.snippet;
+        videoTitle = title || snippet?.title || "不明";
+        description = snippet?.description || "";
+        tags = snippet?.tags?.join(", ") || "";
+        channelTitle = snippet?.channelTitle || "";
+        duration = formatDuration(videoInfo.contentDetails?.duration || "");
+      }
+    } catch (ytError) {
+      console.warn("YouTube Data API skipped or failed (likely quota):", ytError);
+    }
+
+    const prompt = buildPrompt(
+      videoTitle,
+      channelTitle,
+      duration,
+      tags,
+      description,
+      summaryMode,
+    );
+
     const geminiKey = process.env.GEMINI_API_KEY;
-    console.log(`[AI-ROUTE] Key loaded: ${geminiKey ? 'YES' : 'NO'}`);
-    
+    console.log(`[AI-ROUTE] Key loaded: ${geminiKey ? "YES" : "NO"}`);
+
     if (!geminiKey) {
       return NextResponse.json({ error: "Gemini APIキーが設定されていません。" }, { status: 500 });
     }
@@ -102,48 +193,62 @@ export async function POST(request: Request) {
     const genAI = new GoogleGenerativeAI(geminiKey);
     let lastError = "";
 
-    // 利用可能なモデルリスト (APIからの取得結果に基づく)
     const testModels = [
       "gemini-2.0-flash",
       "gemini-flash-latest",
-      "gemini-pro-latest"
+      "gemini-pro-latest",
     ];
 
     for (const modelName of testModels) {
       try {
         console.log(`[AI-ROUTE] Trying model: ${modelName}`);
         const model = genAI.getGenerativeModel({ model: modelName });
-        
-        // タイムアウト設定を追加
+
         const result = await model.generateContent(prompt);
         console.log(`[AI-ROUTE] Success with ${modelName}`);
-        
+
         const responseText = result.response.text();
         const parsed = parseAIResponse(responseText);
 
         if (parsed) {
-          // キャッシュ保存 (非同期で背景で実行)
-          supabase.from('videos').upsert({
-            id: cacheId,
-            title: videoTitle,
-            summary: parsed.summary,
-            quiz: parsed.quiz,
-            updated_at: new Date().toISOString()
-          }).then(({error}) => {
-            if(error) console.error("[AI-ROUTE] DB Save Error:", error);
-            else console.log("[AI-ROUTE] DB Saved success");
-          });
+          dataClient
+            .from("videos")
+            .upsert({
+              id: cacheId,
+              title: videoTitle,
+              summary: parsed.summary,
+              quiz: parsed.quiz,
+              updated_at: new Date().toISOString(),
+            })
+            .then(({ error }) => {
+              if (error) console.error("[AI-ROUTE] DB Save Error:", error);
+              else console.log("[AI-ROUTE] DB Saved success");
+            });
 
-          return NextResponse.json({ ...parsed, model: modelName });
+          const payload = { ...parsed, model: modelName };
+          logAiRequest({
+            endpoint: "/api/ai",
+            userId: user.id,
+            status: 200,
+            startedAt,
+            quotaRemaining: quota.remaining,
+          });
+          return jsonWithQuota(payload, quota);
         }
       } catch (error: any) {
         lastError = error?.message || String(error);
         console.error(`[AI-ROUTE] ${modelName} failed:`, lastError);
-        // 次のモデルへ（429や404などのエラー時）
         continue;
       }
     }
 
+    logAiRequest({
+      endpoint: "/api/ai",
+      userId: user.id,
+      status: 500,
+      startedAt,
+      quotaRemaining: quota.remaining,
+    });
     return NextResponse.json({
       error: formatErrorMessage(lastError),
     }, { status: 500 });
@@ -152,8 +257,76 @@ export async function POST(request: Request) {
     console.error("AI API CRITICAL ERROR:", error);
     if (error.stack) console.error("Stack Trace:", error.stack);
     const message = error?.message || "AI処理中に予期せぬエラーが発生しました";
+    logAiRequest({
+      endpoint: "/api/ai",
+      userId: user.id,
+      status: 500,
+      startedAt,
+    });
     return NextResponse.json({ error: formatErrorMessage(message) }, { status: 500 });
   }
+}
+
+function getDataClient(
+  fallbackClient: Awaited<ReturnType<typeof createServerClient>>,
+) {
+  try {
+    return createAdminClient();
+  } catch {
+    return fallbackClient;
+  }
+}
+
+function jsonWithQuota(
+  data: Record<string, unknown>,
+  quota: AIQuota,
+) {
+  return NextResponse.json({
+    data,
+    quota,
+    ...data,
+  });
+}
+
+function quotaExceededResponse(quota: AIQuota) {
+  return NextResponse.json(
+    {
+      error:
+        `本日の無料枠（${quota.limit}回）に到達しました。リセット後に再度お試しください。`,
+      quota,
+      upgradeHint: "有料プランで上限を拡張予定です。",
+    },
+    { status: 429 },
+  );
+}
+
+function getAISupabaseConfigError() {
+  return getServerSupabaseConfigError() ?? getAdminSupabaseConfigError();
+}
+
+function logAiRequest({
+  endpoint,
+  userId,
+  status,
+  startedAt,
+  quotaRemaining,
+}: {
+  endpoint: string;
+  userId: string | null;
+  status: number;
+  startedAt: number;
+  quotaRemaining?: number;
+}) {
+  console.info(
+    "[AI-REQUEST]",
+    JSON.stringify({
+      endpoint,
+      userId,
+      status,
+      latency: Date.now() - startedAt,
+      quotaRemaining,
+    }),
+  );
 }
 
 function buildPrompt(title: string, channel: string, duration: string, tags: string, description: string, mode: 'lightning' | 'deep'): string {

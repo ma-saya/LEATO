@@ -15,6 +15,14 @@ import {
 
 // UI Components
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Hooks
 import { useVideoPlayer } from "@/hooks/useVideoPlayer";
@@ -128,6 +136,10 @@ function WatchContent({
     aiStatus,
     summaryMode,
     currentAIData,
+    aiQuota,
+    quotaNotice,
+    isQuotaDialogOpen,
+    setIsQuotaDialogOpen,
     quizAnswers,
     quizRevealed,
     messages,
@@ -223,6 +235,16 @@ function WatchContent({
   const embedSrc = isPlaylist
     ? `https://www.youtube-nocookie.com/embed?listType=playlist&list=${id}&rel=0&modestbranding=1&fs=1${savedPlaylistIdx > 0 ? `&index=${savedPlaylistIdx + 1}` : ""}`
     : `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&fs=1`;
+
+  const formattedResetAt =
+    quotaNotice?.quota?.resetAt &&
+    new Intl.DateTimeFormat("ja-JP", {
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+    }).format(new Date(quotaNotice.quota.resetAt));
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -408,6 +430,45 @@ function WatchContent({
           </div>
         </div>
       </main>
+
+      <Dialog open={isQuotaDialogOpen} onOpenChange={setIsQuotaDialogOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl border border-indigo-500/20 bg-background/95 backdrop-blur-xl">
+          <DialogHeader className="text-left">
+            <DialogTitle className="text-xl font-black tracking-tight">
+              本日の無料枠に達しました
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-6 text-muted-foreground">
+              {quotaNotice?.error || "AI利用回数の上限に達しました。"}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 rounded-2xl border border-white/10 bg-card/50 p-4 text-sm">
+            <p className="font-semibold text-foreground">
+              今日の利用状況: {quotaNotice?.quota?.used ?? aiQuota?.used ?? 0}/
+              {quotaNotice?.quota?.limit ?? aiQuota?.limit ?? 10}
+            </p>
+            <p className="text-muted-foreground">
+              残り回数: {quotaNotice?.quota?.remaining ?? aiQuota?.remaining ?? 0}
+            </p>
+            <p className="text-muted-foreground">
+              次回リセット: {formattedResetAt || "UTC 00:00"}
+            </p>
+            <p className="text-xs text-muted-foreground/80">
+              {quotaNotice?.upgradeHint ||
+                "将来ここにプラン案内リンクを表示できるようにしています。"}
+            </p>
+          </div>
+
+          <DialogFooter className="sm:justify-between">
+            <Button variant="outline" disabled>
+              プランを見る
+            </Button>
+            <Button onClick={() => setIsQuotaDialogOpen(false)}>
+              閉じる
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

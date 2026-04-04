@@ -23,6 +23,20 @@ export type AIData = {
   quiz: QuizQuestion[];
 };
 
+export type AIQuota = {
+  limit: number;
+  used: number;
+  remaining: number;
+  resetAt: string;
+  plan?: string;
+};
+
+export type AIQuotaNotice = {
+  error: string;
+  quota: AIQuota | null;
+  upgradeHint?: string;
+};
+
 type UseWatchAIProps = {
   videoId: string;
   title: string;
@@ -43,6 +57,9 @@ export function useWatchAI({
   const [summaryMode, setSummaryMode] = useState<"lightning" | "deep">("deep");
   const [lightningData, setLightningData] = useState<AIData | null>(null);
   const [deepData, setDeepData] = useState<AIData | null>(null);
+  const [aiQuota, setAiQuota] = useState<AIQuota | null>(null);
+  const [quotaNotice, setQuotaNotice] = useState<AIQuotaNotice | null>(null);
+  const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
 
   const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
   const [quizRevealed, setQuizRevealed] = useState<Record<number, boolean>>({});
@@ -65,6 +82,24 @@ export function useWatchAI({
   const handleModeChange = useCallback((mode: "lightning" | "deep") => {
     setSummaryMode(mode);
     localStorage.setItem("leato_summary_mode", mode);
+  }, []);
+
+  const syncQuota = useCallback((payload: any) => {
+    if (payload?.quota) {
+      setAiQuota(payload.quota);
+    }
+  }, []);
+
+  const openQuotaNotice = useCallback((payload: any) => {
+    setQuotaNotice({
+      error: payload?.error || "本日の無料枠に達しました。",
+      quota: payload?.quota ?? null,
+      upgradeHint: payload?.upgradeHint,
+    });
+    setIsQuotaDialogOpen(true);
+    if (payload?.quota) {
+      setAiQuota(payload.quota);
+    }
   }, []);
 
   const currentAIData = summaryMode === "lightning" ? lightningData : deepData;
@@ -96,9 +131,20 @@ export function useWatchAI({
           body: JSON.stringify({ videoId, title, mode: targetMode }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "AI処理に失敗しました");
-        if (targetMode === "lightning") setLightningData(data);
-        else setDeepData(data);
+        syncQuota(data);
+        if (!res.ok) {
+          if (res.status === 429) {
+            openQuotaNotice(data);
+          }
+          const error = new Error(data.error || "AI処理に失敗しました") as Error & {
+            status?: number;
+          };
+          error.status = res.status;
+          throw error;
+        }
+        const payload = data.data ?? data;
+        if (targetMode === "lightning") setLightningData(payload);
+        else setDeepData(payload);
       } catch (err: any) {
         setAiError(err.message || "AI処理中にエラーが発生しました");
       } finally {
@@ -106,7 +152,7 @@ export function useWatchAI({
         setAiStatus("");
       }
     },
-    [videoId, title, summaryMode],
+    [videoId, title, summaryMode, syncQuota, openQuotaNotice],
   );
 
   useEffect(() => {
@@ -120,16 +166,18 @@ export function useWatchAI({
           body: JSON.stringify({ videoId, title, mode, checkOnly: true }),
         });
         const data = await res.json();
-        if (res.ok && data.summary) {
-          if (mode === "lightning") setLightningData(data);
-          else setDeepData(data);
+        syncQuota(data);
+        const payload = data.data ?? data;
+        if (res.ok && payload?.summary) {
+          if (mode === "lightning") setLightningData(payload);
+          else setDeepData(payload);
         }
       } catch (err) {}
     };
 
     fetchCache("lightning");
     fetchCache("deep");
-  }, [videoId, title]);
+  }, [videoId, title, syncQuota]);
 
   const handleQuizAnswer = useCallback(
     (qIndex: number, opeIndex: number) => {
@@ -162,22 +210,35 @@ export function useWatchAI({
           }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "通信エラーが発生しました");
+        syncQuota(data);
+        if (!res.ok) {
+          if (res.status === 429) {
+            openQuotaNotice(data);
+          }
+          const error = new Error(
+            data.error || "通信エラーが発生しました",
+          ) as Error & { status?: number };
+          error.status = res.status;
+          throw error;
+        }
+        const payload = data.data ?? data;
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: data.message },
+          { role: "assistant", content: payload.message },
         ]);
       } catch (err: any) {
-        setChatError(err.message);
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: `エラー: ${err.message}` },
-        ]);
+        setChatError(err.message || "通信エラーが発生しました");
+        if (err?.status !== 401 && err?.status !== 429) {
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: `エラー: ${err.message}` },
+          ]);
+        }
       } finally {
         setIsChatLoading(false);
       }
     },
-    [chatInput, isChatLoading, videoId, messages],
+    [chatInput, isChatLoading, videoId, messages, syncQuota, openQuotaNotice],
   );
 
   useEffect(() => {
@@ -192,6 +253,10 @@ export function useWatchAI({
     aiStatus,
     summaryMode,
     currentAIData,
+    aiQuota,
+    quotaNotice,
+    isQuotaDialogOpen,
+    setIsQuotaDialogOpen,
     lightningData,
     deepData,
     quizAnswers,
