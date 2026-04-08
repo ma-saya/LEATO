@@ -37,8 +37,6 @@ export async function GET(request: Request) {
         q: query,
         type: ["video"],
         maxResults: 25,
-        hl: "ja",
-        regionCode: "JP",
       });
 
       const videoIds = (searchRes.data.items || [])
