@@ -44,17 +44,23 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let guestUsageObj: { date: string, count: number } = { date: "", count: 0 };
+  const todayDateStr = new Date().toISOString().slice(0, 10);
   if (!user) {
-    logAiRequest({
-      endpoint: "/api/ai",
-      userId: null,
-      status: 401,
-      startedAt,
-    });
-    return NextResponse.json(
-      { error: "AI機能はログイン後に利用できます。" },
-      { status: 401 },
-    );
+    const cookieHeader = request.headers.get("cookie") || "";
+    const match = cookieHeader.match(/guest_ai_usage=([^;]+)/);
+    if (match) {
+      try {
+        guestUsageObj = JSON.parse(decodeURIComponent(match[1]));
+        if (guestUsageObj?.date !== todayDateStr) {
+          guestUsageObj = { date: todayDateStr, count: 0 };
+        }
+      } catch {
+        guestUsageObj = { date: todayDateStr, count: 0 };
+      }
+    } else {
+      guestUsageObj = { date: todayDateStr, count: 0 };
+    }
   }
 
   const dataClient = getDataClient(supabase);
@@ -65,7 +71,11 @@ export async function POST(request: Request) {
 
   try {
     const cacheId = `${videoId}_${summaryMode}`;
-    const quotaSnapshot = await getDailyQuotaSnapshot(user.id);
+    const nextReset = new Date(new Date().setUTCHours(24, 0, 0, 0)).toISOString();
+    
+    const quotaSnapshot = user
+      ? await getDailyQuotaSnapshot(user.id)
+      : { limit: 5, used: guestUsageObj.count, remaining: Math.max(5 - guestUsageObj.count, 0), resetAt: nextReset, plan: "guest" as any };
 
     console.log(`Checking cache for: ${cacheId}`);
     const { data: cachedData, error: cacheError } = await dataClient
@@ -83,7 +93,7 @@ export async function POST(request: Request) {
         if (checkOnly) {
           logAiRequest({
             endpoint: "/api/ai",
-            userId: user.id,
+            userId: user?.id || "guest",
             status: 200,
             startedAt,
             quotaRemaining: quotaSnapshot.remaining,
@@ -107,7 +117,7 @@ export async function POST(request: Request) {
         console.log("Cache hit! Returning DB results.");
         logAiRequest({
           endpoint: "/api/ai",
-          userId: user.id,
+          userId: user?.id || "guest",
           status: 200,
           startedAt,
           quotaRemaining: quotaSnapshot.remaining,
@@ -123,7 +133,7 @@ export async function POST(request: Request) {
     if (checkOnly) {
       logAiRequest({
         endpoint: "/api/ai",
-        userId: user.id,
+        userId: user?.id || "guest",
         status: 200,
         startedAt,
         quotaRemaining: quotaSnapshot.remaining,
@@ -136,16 +146,39 @@ export async function POST(request: Request) {
       });
     }
 
-    const quota = await consumeDailyQuota(user.id);
+    let quota: any;
+    if (user) {
+      quota = await consumeDailyQuota(user.id);
+    } else {
+      guestUsageObj.count += 1;
+      quota = { 
+        limit: 5, 
+        used: guestUsageObj.count, 
+        remaining: Math.max(5 - guestUsageObj.count, 0), 
+        resetAt: nextReset, 
+        plan: "guest",
+        allowed: guestUsageObj.count <= 5
+      };
+    }
+
     if (!quota.allowed) {
       logAiRequest({
         endpoint: "/api/ai",
-        userId: user.id,
+        userId: user?.id || "guest",
         status: 429,
         startedAt,
         quotaRemaining: quota.remaining,
       });
-      return quotaExceededResponse(quota);
+      return NextResponse.json(
+        {
+          error: user 
+            ? `本日の無料枠（${quota.limit}回）に到達しました。リセット後に再度お試しください。`
+            : `ゲスト利用の無料枠（1日5回）に到達しました。明日再度お試しいただくか、ログインしてご利用ください。`,
+          quota,
+          upgradeHint: user ? "有料プランで上限を拡張予定です。" : "ログインすることで利用枠を増やすことができます。",
+        },
+        { status: 429 }
+      );
     }
 
     let videoTitle = title || "不明";
@@ -228,12 +261,16 @@ export async function POST(request: Request) {
           const payload = { ...parsed, model: modelName };
           logAiRequest({
             endpoint: "/api/ai",
-            userId: user.id,
+            userId: user?.id || "guest",
             status: 200,
             startedAt,
             quotaRemaining: quota.remaining,
           });
-          return jsonWithQuota(payload, quota);
+          const response = jsonWithQuota(payload, quota);
+          if (!user) {
+            response.cookies.set("guest_ai_usage", JSON.stringify(guestUsageObj), { maxAge: 60 * 60 * 24 * 30, path: '/' });
+          }
+          return response;
         }
       } catch (error: any) {
         lastError = error?.message || String(error);
@@ -244,7 +281,7 @@ export async function POST(request: Request) {
 
     logAiRequest({
       endpoint: "/api/ai",
-      userId: user.id,
+      userId: user?.id || "guest",
       status: 500,
       startedAt,
       quotaRemaining: quota.remaining,
@@ -259,7 +296,7 @@ export async function POST(request: Request) {
     const message = error?.message || "AI処理中に予期せぬエラーが発生しました";
     logAiRequest({
       endpoint: "/api/ai",
-      userId: user.id,
+      userId: user?.id || "guest",
       status: 500,
       startedAt,
     });
