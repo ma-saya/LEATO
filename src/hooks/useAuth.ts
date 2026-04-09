@@ -64,4 +64,4 @@ const ANONYMOUS_USER = {
                         
                           return { currentUser, loading, handleLogout };
                           }
-                          */'
+                          */
